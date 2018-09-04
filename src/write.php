@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace icePHP;
 
-function writeFile(string $file, $content, int $flag = 0)
+function write(string $file, $content, int $flag = 0)
 {
     //当前用户
     $current = getenv('USERNAME') ?: getenv('USER');
