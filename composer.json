@@ -1,0 +1,42 @@
+{
+  "name": "ice-php/write",
+  "description": "处理Linux下的写权限及用户问题",
+  "keywords": [
+    "icePHP",
+    "write"
+  ],
+  "homepage": "https://github.com/ice-php/write",
+  "type": "composer",
+  "license": "MIT",
+  "support": {
+    "source": "https://github.com/ice-php/write"
+  },
+  "authors": [
+    {
+      "name": "blueice",
+      "email": "liyong@nenu.edu.cn"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "ice-php/config": "dev-master"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "files": [
+      "src/write.php"
+    ],
+    "psr-4": {
+      "icePHP\\": "src/"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://packagist.org"
+    }
+  },
+  "config": {
+    "process-timeout": 1800
+  }
+}
