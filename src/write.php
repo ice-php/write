@@ -8,9 +8,8 @@ namespace icePHP;
  * @param $file string 文件名
  * @param $content string 文件内容
  * @param int $flag FILE_APPEND&|LOCK_EX
- * @return false|int
  */
-function write(string $file, $content, int $flag = 0)
+function write(string $file, $content, int $flag = 0): void
 {
     //当前用户
     $current = getenv('USERNAME') ?: getenv('USER');
@@ -25,7 +24,10 @@ function write(string $file, $content, int $flag = 0)
 
     //如果操作系统是Windows或当前已经是应该的用户,则不处理
     if (isWindows() or $current === $should) {
-        return file_put_contents($file, $content, $flag);
+        if (false === file_put_contents($file, $content, $flag)) {
+            trigger_error('写入文件失败:' . $file);
+        };
+        return;
     }
 
     //提前调整文件所有者
@@ -37,7 +39,9 @@ function write(string $file, $content, int $flag = 0)
     }
 
     //写入文件
-    $ret = file_put_contents($file, $content, $flag);
+    if (false === file_put_contents($file, $content, $flag)) {
+        trigger_error('写入文件失败:' . $file);
+    };
 
     if (function_exists('posix_getpwuid')) {
         //延后调整文件所有者
@@ -46,8 +50,6 @@ function write(string $file, $content, int $flag = 0)
             chown($file, $should);
         }
     }
-
-    return $ret;
 }
 
 /**
@@ -69,11 +71,15 @@ function makeDir(string $path): void
 
     //如果上一级不是目录,则创建上一级
     if (!is_dir($parent)) {
-        makeDir($parent);
+        if (false === makeDir($parent)) {
+            trigger_error('创建目录失败:' . $parent);
+        };
     }
 
     //创建当前目录
-    mkdir($path, 0777);
+    if (false === mkdir($path, 0777)) {
+        trigger_error('创建目录失败:' . $path);
+    };
 
     //Windows系统,不进行后续处理
     if (isWindows()) {
