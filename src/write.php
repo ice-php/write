@@ -15,12 +15,7 @@ function write(string $file, $content, int $flag = 0): void
     $current = getenv('USERNAME') ?: getenv('USER');
 
     //应该是这个用户
-    try {
-        $should = config('system', 'OS_USER');
-    } catch (ConfigException $e) {
-        //如果未配置,则使用当前用户
-        $should = $current;
-    }
+    $should = configDefault($current,'system', 'OS_USER');
 
     //如果操作系统是Windows或当前已经是应该的用户,则不处理
     if (isWindows() or $current === $should) {
@@ -90,12 +85,7 @@ function makeDir(string $path): void
     $current = getenv('USERNAME') ?: getenv('USER');
 
     //应该是这个用户
-    try {
-        $should = config('system', 'OS_USER');
-    } catch (ConfigException $e) {
-        //如果未配置,则使用当前用户
-        $should = $current;
-    }
+    $should = configDefault($current,'system', 'OS_USER');
 
     //如果当前已经是应该的用户,则不处理
     if ($current === $should) {
