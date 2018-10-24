@@ -4,36 +4,36 @@ declare(strict_types=1);
 namespace icePHP;
 
 /**
- * 对file_put_contents的封装,以修正文件所有者
+ * 对file_put_contents的封装,初始化文件所有者(解决root执行www用户无法写入问题)
  * @param $file string 文件名
  * @param $content string 文件内容
  * @param int $flag FILE_APPEND&|LOCK_EX
  */
 function write(string $file, $content, int $flag = 0): void
 {
-    //当前用户
-    $current = getenv('USERNAME') ?: getenv('USER');
+    //判断文件是否存在
+    $isExist = is_file($file);
     
-    //应该是这个用户
-    $should = configDefault($current,'system', 'OS_USER');
-    
-    //如果操作系统是Windows或当前已经是应该的用户,则不处理
-    if (isWindows() or $current === $should) {
+    //已经存在 或 操作系统是Windows 直接写入
+    if (isWindows() || $isExist) {
         if (false === file_put_contents($file, $content, $flag)) {
             trigger_error('写入文件失败:' . $file);
         };
         return;
     }
-    
-    //如果存在当前文件并且非指定用户 则变更为指定用户
-    if (is_file($file) && $current !== $should) {
-        chown($file, $should);
-    }
-    
-    //写入文件
+
+    //如果是linux系统并且不存在 第一次写入并指定所有者
     if (false === file_put_contents($file, $content, $flag)) {
         trigger_error('写入文件失败:' . $file);
     };
+    
+    //默认缺省值为www用户
+    $defaultUser = 'www';
+    
+    //被指定的用户
+    $user = configDefault($defaultUser,'system', 'OS_USER');
+    
+    chown($file, $user);
 }
 
 /**
