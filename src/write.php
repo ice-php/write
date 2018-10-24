@@ -13,10 +13,10 @@ function write(string $file, $content, int $flag = 0): void
 {
     //当前用户
     $current = getenv('USERNAME') ?: getenv('USER');
-
+    
     //应该是这个用户
     $should = configDefault($current,'system', 'OS_USER');
-
+    
     //如果操作系统是Windows或当前已经是应该的用户,则不处理
     if (isWindows() or $current === $should) {
         if (false === file_put_contents($file, $content, $flag)) {
@@ -24,27 +24,16 @@ function write(string $file, $content, int $flag = 0): void
         };
         return;
     }
-
-    //提前调整文件所有者
-    if (function_exists('posix_getpwuid') && is_file($file)) {
-        $owner = posix_getpwuid(fileowner($file));
-        if ($owner !== $should) {
-            chown($file, $should);
-        }
+    
+    //如果存在当前文件并且非指定用户 则变更为指定用户
+    if (is_file($file) && $current !== $should) {
+        chown($file, $should);
     }
-
+    
     //写入文件
     if (false === file_put_contents($file, $content, $flag)) {
         trigger_error('写入文件失败:' . $file);
     };
-
-    if (function_exists('posix_getpwuid')) {
-        //延后调整文件所有者
-        $owner = posix_getpwuid(fileowner($file));
-        if ($owner !== $should) {
-            chown($file, $should);
-        }
-    }
 }
 
 /**
